@@ -1,3 +1,4 @@
+from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 import os.path
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -154,8 +155,6 @@ with open(filename_noise, 'w') as f:
 noise.to_csv(filename_noise,index=False, header=None, mode='a')
 
 print('Done!')
-# np.savetxt(filename_hits, tf.reshape(hits,[nofEvents,-1]), fmt='%d', header=header) 
-# np.savetxt(filename_noise, tf.reshape(noise,[nofEvents,-1]), fmt='%d', header=header) 
 
 
 
