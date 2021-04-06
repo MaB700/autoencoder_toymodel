@@ -9,8 +9,14 @@ from tqdm import tqdm
 import random as rndx
 from sklearn.datasets import make_circles
 
-
 nofEvents = 10000
+
+# % of events with 2 rings are overlapped
+# example: overlapped_ring=0.9, 90% of events with 2 rings are overlapped, rest 10% of 2 rings and randomly
+overlapped_rings = 0.5 
+
+# nofSingleRingEvents out of 100 events , [0, 100] -> nofDoubleRingEvents out of 100 events= 100-nofSingleRingEvents
+nofSingleRingEvents = 95
 
 minX = -20.0
 maxX = 20.0
@@ -20,9 +26,9 @@ minY = -20.0
 maxY = 20.0
 nofPixelY = 48
 
+
 def create_rnd_ring(params=[0,0,0]):
     rndx.seed()
-    
     xshift=rndx.uniform(minX,maxX)
     yshift=rndx.uniform(minY,maxY)
     radius=rndx.uniform(3.0,5.0)
@@ -34,7 +40,7 @@ def create_rnd_ring(params=[0,0,0]):
             X[i][0] +=xshift
             X[i][1] *=radius
             X[i][1] +=yshift
-    elif params[0]!=0 and weight_of_overlapped_rings<0.5:
+    elif params[0]!=0 and weight_of_overlapped_rings < overlapped_rings:
         xshift_overlap=params[0] + rndx.uniform(-1.8*params[2],1.8*params[2])
         yshift_overlap=params[1] + rndx.uniform(-1.8*params[2],1.8*params[2])
         radius_overlap=params[2]*rndx.uniform(0.8,1.2)
@@ -54,7 +60,11 @@ def create_rnd_ring(params=[0,0,0]):
 
 def create_single_event():
     rndx.seed()
-    nofRings=rndx.randint(1,2)
+    rnumber=rndx.randint(1,100)
+    if rnumber <= nofSingleRingEvents:
+        nofRings = 1
+    else:
+        nofRings = 2
     X, Y, params = create_rnd_ring()
     for _ in range(0,nofRings-1): 
         X1, Y1, params = create_rnd_ring(params)
@@ -138,7 +148,9 @@ print('Saving to file...\n')
 hits = pd.DataFrame((tf.reshape(hits,[nofEvents,-1])).numpy())
 noise = pd.DataFrame((tf.reshape(noise,[nofEvents,-1])).numpy())
 
-header = '#nofEvents='+str(nofEvents)+', nofPixelX='+str(nofPixelX)+', min_X='+str(minX)+', max_X='+str(maxX)+', nofPixelY='+str(nofPixelY)+', min_Y='+str(minY)+', max_Y='+str(maxY)+'\n'
+header = '#nofEvents='+str(nofEvents)+', overlapped_rings%='+str(overlapped_rings)+\
+', nofSingleRingEventsOutOf100='+str(nofSingleRingEvents)+', nofPixelX='+str(nofPixelX)+', min_X='+str(minX)+\
+', max_X='+str(maxX)+', nofPixelY='+str(nofPixelY)+', min_Y='+str(minY)+', max_Y='+str(maxY)+'\n'
 path = 'E:/ML_data/autoencoder_toymodel/'
 
 if not os.path.isdir(path):
@@ -155,8 +167,3 @@ with open(filename_noise, 'w') as f:
 noise.to_csv(filename_noise,index=False, header=None, mode='a')
 
 print('Done!')
-
-
-
-
-
