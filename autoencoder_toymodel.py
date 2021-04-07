@@ -36,6 +36,7 @@ cut_range = 20.0
 px_x = 48
 px_y = 48
 
+filter_seq = [128, 64, 32]
 
 hits_train = pd.read_csv("D:/ML_data/encoder/hits_1000.csv",header=None ,comment='#', nrows=nofEvents_train).values.astype('float32')
 hits_test = pd.read_csv("D:/ML_data/encoder/hits_500.csv",header=None ,comment='#', nrows=nofEvents_test).values.astype('float32')
