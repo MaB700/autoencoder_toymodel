@@ -1,3 +1,5 @@
+# %%
+#%%
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 import os.path
@@ -8,15 +10,15 @@ import pandas as pd
 from tqdm import tqdm
 import random as rndx
 from sklearn.datasets import make_circles
-
+#%%
 nofEvents = 10000
 
 # % of events with 2 rings are overlapped
 # example: overlapped_ring=0.9, 90% of events with 2 rings are overlapped, rest 10% of 2 rings and randomly
-overlapped_rings = 0.5 
+overlapped_rings = 0.9 
 
 # nofSingleRingEvents out of 100 events , [0, 100] -> nofDoubleRingEvents out of 100 events= 100-nofSingleRingEvents
-nofSingleRingEvents = 95
+nofSingleRingEvents = 10
 
 minX = -20.0
 maxX = 20.0
@@ -60,6 +62,8 @@ def create_rnd_ring(params=[0,0,0]):
 
 def create_single_event():
     rndx.seed()
+    #alternative, but seems to be slower ...
+    #nofRings = rndx.choices(population=[1, 2], weights=[0.1, 0.9])[0]
     rnumber=rndx.randint(1,100)
     if rnumber <= nofSingleRingEvents:
         nofRings = 1
@@ -167,3 +171,4 @@ with open(filename_noise, 'w') as f:
 noise.to_csv(filename_noise,index=False, header=None, mode='a')
 
 print('Done!')
+# %%
