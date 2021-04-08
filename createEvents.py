@@ -1,5 +1,3 @@
-# %%
-#%%
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 import os.path
@@ -10,15 +8,16 @@ import pandas as pd
 from tqdm import tqdm
 import random as rndx
 from sklearn.datasets import make_circles
-#%%
+import time
+
 nofEvents = 10000
 
 # % of events with 2 rings are overlapped
 # example: overlapped_ring=0.9, 90% of events with 2 rings are overlapped, rest 10% of 2 rings and randomly
-overlapped_rings = 0.9 
+overlapped_rings = 0.5 
 
 # nofSingleRingEvents out of 100 events , [0, 100] -> nofDoubleRingEvents out of 100 events= 100-nofSingleRingEvents
-nofSingleRingEvents = 10
+nofSingleRingEvents = 50
 
 minX = -20.0
 maxX = 20.0
@@ -152,15 +151,17 @@ print('Saving to file...\n')
 hits = pd.DataFrame((tf.reshape(hits,[nofEvents,-1])).numpy())
 noise = pd.DataFrame((tf.reshape(noise,[nofEvents,-1])).numpy())
 
-header = '#nofEvents='+str(nofEvents)+', overlapped_rings%='+str(overlapped_rings)+\
-', nofSingleRingEventsOutOf100='+str(nofSingleRingEvents)+', nofPixelX='+str(nofPixelX)+', min_X='+str(minX)+\
-', max_X='+str(maxX)+', nofPixelY='+str(nofPixelY)+', min_Y='+str(minY)+', max_Y='+str(maxY)+'\n'
-path = 'E:/ML_data/autoencoder_toymodel/'
+timestr = time.strftime("%Y%m%d-%H%M%S")
 
+path = 'E:/ML_data/autoencoder_toymodel/balanced/'
 if not os.path.isdir(path):
     os.mkdir(path)
-filename_hits = path + 'hits_'+str(nofEvents)+'.csv'
-filename_noise = path + 'noise_'+str(nofEvents)+'.csv'
+filename_hits = path + 'hits_'+str(nofEvents)+'_'+timestr+'.csv'
+filename_noise = path + 'noise_'+str(nofEvents)+'_'+timestr+'.csv'
+
+header = '#create_time='+str(timestr)+', nofEvents='+str(nofEvents)+', overlapped_rings%='+str(overlapped_rings)+\
+', nofSingleRingEventsOutOf100='+str(nofSingleRingEvents)+', nofPixelX='+str(nofPixelX)+', min_X='+str(minX)+\
+', max_X='+str(maxX)+', nofPixelY='+str(nofPixelY)+', min_Y='+str(minY)+', max_Y='+str(maxY)+'\n'
 
 with open(filename_hits, 'w') as f:
     f.write(header)
@@ -171,4 +172,4 @@ with open(filename_noise, 'w') as f:
 noise.to_csv(filename_noise,index=False, header=None, mode='a')
 
 print('Done!')
-# %%
+
