@@ -38,14 +38,11 @@ px_y = 48
 
 filter_seq = [128, 64, 32]
 
-hits_train = pd.read_csv("D:/ML_data/encoder/hits_1000.csv",header=None ,comment='#', nrows=nofEvents_train).values.astype('float32')
-hits_test = pd.read_csv("D:/ML_data/encoder/hits_500.csv",header=None ,comment='#', nrows=nofEvents_test).values.astype('float32')
-noise_train = pd.read_csv("D:/ML_data/encoder/noise_1000.csv",header=None ,comment='#', nrows=nofEvents_train).values.astype('float32')
-noise_test = pd.read_csv("D:/ML_data/encoder/noise_500.csv",header=None ,comment='#', nrows=nofEvents_test).values.astype('float32')
-# hits_train = pd.read_csv("hits_100.csv",header=None ,comment='#', nrows=100).values.astype('float32')
-# hits_test = pd.read_csv("hits_10.csv",header=None ,comment='#',).values.astype('float32')
-# noise_train = pd.read_csv("noise_100.csv",header=None ,comment='#', nrows=100).values.astype('float32')
-# noise_test = pd.read_csv("noise_10.csv",header=None ,comment='#').values.astype('float32')
+hits_train = pd.read_csv("E:/ML_data/autoencoder_toymodel/overlapped/hits_20000_20210408-192455.csv",header=None ,comment='#', nrows=nofEvents_train).values.astype('float32')
+hits_test = pd.read_csv("E:/ML_data/autoencoder_toymodel/overlapped/hits_10000_20210408-192127.csv",header=None ,comment='#', nrows=nofEvents_test).values.astype('float32')
+noise_train = pd.read_csv("E:/ML_data/autoencoder_toymodel/overlapped/noise_20000_20210408-192455.csv",header=None ,comment='#', nrows=nofEvents_train).values.astype('float32')
+noise_test = pd.read_csv("E:/ML_data/autoencoder_toymodel/overlapped/noise_10000_20210408-192127.csv",header=None ,comment='#', nrows=nofEvents_test).values.astype('float32')
+
 
 hits_train = tf.reshape(hits_train, [nofEvents_train, px_y, px_x])
 hits_test = tf.reshape(hits_test, [nofEvents_test, px_y, px_x])
