@@ -36,7 +36,12 @@ cut_range = 20.0
 px_x = 48
 px_y = 48
 
-filter_seq = [128, 64, 32]
+filter_kernel_seq = [   [128,5],\
+                        [64,3],\
+                        [32,1]]
+filter_kernel_seq_reverse = filter_kernel_seq[::-1]
+
+output_kernel_size = 5
 
 hits_train = pd.read_csv("E:/ML_data/autoencoder_toymodel/overlapped/hits_20000_20210408-192455.csv",header=None ,comment='#', nrows=nofEvents_train).values.astype('float32')
 hits_test = pd.read_csv("E:/ML_data/autoencoder_toymodel/overlapped/hits_10000_20210408-192127.csv",header=None ,comment='#', nrows=nofEvents_test).values.astype('float32')
@@ -74,19 +79,22 @@ hits_test = tf.concat([hits_test, noise_test, order1_test, order2_test], 3)
 #del noise_train, noise_test, order1_train, order2_train, order1_test, order2_test #free up momory
 
 # %%
-ks = 5
+custom_metrics = [get_hit_average(), get_noise_average(), get_background_average(),\
+                    get_hit_average_order1(), get_hit_average_order2()]
 
 model = Sequential()
 model.add(Input(shape=(48, 48, 1)))
-model.add(Conv2D(128, (ks, ks), activation='relu', padding='same'))
-model.add(Conv2D(64, (ks, ks), activation='relu', padding='same'))
-model.add(Conv2DTranspose(64 , kernel_size=ks, activation='relu', padding='same'))
-model.add(Conv2DTranspose(128 , kernel_size=ks, activation='relu', padding='same'))
-model.add(Conv2D(1, kernel_size=(ks, ks), activation='tanh', padding='same'))
+
+for x in filter_kernel_seq:
+    model.add(Conv2D(filters=x[0], kernel_size=x[1], activation='relu', padding='same'))
+for x in filter_kernel_seq_reverse:
+    model.add(Conv2DTranspose(filters=x[0] , kernel_size=x[1], activation='relu', padding='same'))
+
+model.add(Conv2D(1, kernel_size=output_kernel_size, activation='tanh', padding='same'))
 
 #opt = tf.keras.optimizers.Adadelta(lr=0.1, rho=0.95, epsilon=1e-07 )
 opt = tf.keras.optimizers.Adam(learning_rate=0.001)
-model.compile(optimizer=opt, loss=get_custom_loss(), metrics=[get_hit_average(), get_noise_average(), get_background_average(), get_hit_average_order1(), get_hit_average_order2()])
+model.compile(optimizer=opt, loss=get_custom_loss(), metrics=custom_metrics)
 
 model.fit(hits_noise_train, hits_train,
                 epochs=20,
