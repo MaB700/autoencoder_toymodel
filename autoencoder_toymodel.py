@@ -25,23 +25,16 @@ from wandb.keras import WandbCallback
 #wandb.init(project="autoencoder_mcbm_toy_denoise")
 
 print('Tensorflow version: ' + tf.__version__)
-
+print("GPU is", "available" if tf.config.list_physical_devices('GPU') else "NOT available")
 # %%
 # load dataset
 # header gives information of parameters
 # TODO: load parameters from file header
-nofEvents_train = 1000
-nofEvents_test = 100
+nofEvents_train = 10000
+nofEvents_test = 1000
 cut_range = 20.0
 px_x = 48
 px_y = 48
-
-filter_kernel_seq = [   [128,5],\
-                        [64,3],\
-                        [32,1]]
-filter_kernel_seq_reverse = filter_kernel_seq[::-1]
-
-output_kernel_size = 5
 
 hits_train = pd.read_csv("E:/ML_data/autoencoder_toymodel/overlapped/hits_20000_20210408-192455.csv",header=None ,comment='#', nrows=nofEvents_train).values.astype('float32')
 hits_test = pd.read_csv("E:/ML_data/autoencoder_toymodel/overlapped/hits_10000_20210408-192127.csv",header=None ,comment='#', nrows=nofEvents_test).values.astype('float32')
@@ -79,6 +72,12 @@ hits_test = tf.concat([hits_test, noise_test, order1_test, order2_test], 3)
 #del noise_train, noise_test, order1_train, order2_train, order1_test, order2_test #free up momory
 
 # %%
+filter_kernel_seq = [   [128,5],\
+                        [64,5]]
+filter_kernel_seq_reverse = filter_kernel_seq[::-1]
+
+output_kernel_size = 5
+
 custom_metrics = [get_hit_average(), get_noise_average(), get_background_average(),\
                     get_hit_average_order1(), get_hit_average_order2()]
 
@@ -91,15 +90,15 @@ for x in filter_kernel_seq_reverse:
     model.add(Conv2DTranspose(filters=x[0] , kernel_size=x[1], activation='relu', padding='same'))
 
 model.add(Conv2D(1, kernel_size=output_kernel_size, activation='tanh', padding='same'))
-
+model.summary()
 #opt = tf.keras.optimizers.Adadelta(lr=0.1, rho=0.95, epsilon=1e-07 )
 opt = tf.keras.optimizers.Adam(learning_rate=0.001)
 model.compile(optimizer=opt, loss=get_custom_loss(), metrics=custom_metrics)
 
 model.fit(hits_noise_train, hits_train,
                 epochs=20,
-                batch_size=100,
-                shuffle=False,
+                batch_size=200,
+                shuffle=False, verbose=1, 
                 validation_data=(hits_noise_test, hits_test))#,
                 #callbacks=[WandbCallback(log_weights=True)])
 
