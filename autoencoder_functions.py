@@ -33,7 +33,7 @@ def get_hit_average():
     @tf.autograph.experimental.do_not_convert
     def hit_average(data, y_pred):
         y_true = data[:,:,:,0]
-        nofHits = tf.math.count_nonzero(y_true, dtype=tf.float32)
+        nofHits = tf.math.count_nonzero(tf.greater(y_true,0.01), dtype=tf.float32)
         return (K.sum(y_true*y_pred[:,:,:,0])/nofHits)
     return hit_average
 
@@ -42,7 +42,7 @@ def get_hit_average_order1():
     @tf.autograph.experimental.do_not_convert
     def hit_average_order1(data, y_pred):
         y_hits_in_order1 = data[:,:,:,0]*data[:,:,:,2]
-        nofHitsInOrder1 = tf.math.count_nonzero(y_hits_in_order1, dtype=tf.float32)
+        nofHitsInOrder1 = tf.math.count_nonzero(tf.greater(y_hits_in_order1,0.01), dtype=tf.float32)
         return (K.sum(y_hits_in_order1*y_pred[:,:,:,0])/nofHitsInOrder1)
     return hit_average_order1
 
@@ -51,7 +51,7 @@ def get_hit_average_order2():
     @tf.autograph.experimental.do_not_convert
     def hit_average_order2(data, y_pred):
         y_hits_in_order2 = data[:,:,:,0]*data[:,:,:,3]
-        nofHitsInOrder2 = tf.math.count_nonzero(y_hits_in_order2, dtype=tf.float32)
+        nofHitsInOrder2 = tf.math.count_nonzero(tf.greater(y_hits_in_order2,0.01), dtype=tf.float32)
         return (K.sum(y_hits_in_order2*y_pred[:,:,:,0])/nofHitsInOrder2)
     return hit_average_order2       
 
@@ -60,7 +60,7 @@ def get_noise_average():
     @tf.autograph.experimental.do_not_convert
     def noise_average(data, y_pred):
         y_noise = data[:,:,:,1]
-        nofNoise = tf.math.count_nonzero(y_noise, dtype=tf.float32)
+        nofNoise = tf.math.count_nonzero(tf.greater(y_noise,0.01), dtype=tf.float32)
         return (K.sum(y_noise*y_pred[:,:,:,0])/nofNoise)
     return noise_average
 

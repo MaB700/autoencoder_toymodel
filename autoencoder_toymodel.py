@@ -73,7 +73,8 @@ hits_test = tf.concat([hits_test, noise_test, order1_test, order2_test], 3)
 
 # %%
 filter_kernel_seq = [   [128,5],\
-                        [64,5]]
+                        [64,5],
+                        [32,3]]
 filter_kernel_seq_reverse = filter_kernel_seq[::-1]
 
 output_kernel_size = 5
@@ -93,23 +94,52 @@ model.add(Conv2D(1, kernel_size=output_kernel_size, activation='tanh', padding='
 model.summary()
 #opt = tf.keras.optimizers.Adadelta(lr=0.1, rho=0.95, epsilon=1e-07 )
 opt = tf.keras.optimizers.Adam(learning_rate=0.001)
-model.compile(optimizer=opt, loss=get_custom_loss(), metrics=custom_metrics)
+model.compile(optimizer=opt, loss=get_custom_loss(), metrics=custom_metrics, experimental_steps_per_execution=10)
 
 model.fit(hits_noise_train, hits_train,
-                epochs=20,
+                epochs=50,
                 batch_size=200,
-                shuffle=False, verbose=1, 
+                shuffle=True,
                 validation_data=(hits_noise_test, hits_test))#,
                 #callbacks=[WandbCallback(log_weights=True)])
-
+#print('model evaluate ...\n')
+#model.evaluate(hits_noise_test, hits_test, verbose=1)
 
 # %%
 
+#noise_plt = tf.math.scalar_mul(2.0, hits_test[:,:,:,1])
+# create data for plot with different colors for hit/noise
+original_plt = tf.math.add(hits_test[:,:,:,0], tf.math.scalar_mul(2.0, hits_test[:,:,:,1]) )
+
+# %%
+encoded = model.predict(hits_noise_test, batch_size=200)
+
 # # single_event_plot(hits_noise_train, 48, -20.0, 20.0, 48, -20.0, 20.0, 0)
 
-# noise_plt = tf.math.scalar_mul(2.0, hits_test[:,:,:,1])
-# original_plt = tf.math.add(hits_test[:,:,:,0], tf.squeeze(noise_plt, [3]) )
 
-#interactive_plot = widgets.interact(single_event_plot, data=fixed(noise_train), data0=fixed(2*noise_train+3*order2_train+order1_train), nof_pixel_X=fixed(px_x), min_X=fixed(-cut_range), max_X=fixed(cut_range), nof_pixel_Y=fixed(px_y), min_Y=fixed(-cut_range), max_Y=fixed(cut_range),eventNo=(0,10-1,1))
+interactive_plot = widgets.interact(single_event_plot, \
+                    data=fixed(tf.squeeze(encoded,[3])), data0=fixed(2*hits_test[:,:,:,1]+hits_test[:,:,:,0]), \
+                    nof_pixel_X=fixed(px_x), min_X=fixed(-cut_range), max_X=fixed(cut_range), \
+                    nof_pixel_Y=fixed(px_y), min_Y=fixed(-cut_range), max_Y=fixed(cut_range), eventNo=(0,20-1,1))
 
 
+
+# # %%
+# #model.evaluate((hits_noise_test[14,:,:,:])[tf.newaxis,...], (hits_test[14,:,:,:])[tf.newaxis,...], verbose=1);
+# def hit_average_order2(data, y_pred):
+#     y_hits_in_order2 = data[14,:,:,0]*data[14,:,:,3]
+#     nofHitsInOrder2 = tf.math.count_nonzero(tf.greater(y_hits_in_order2,0.01), dtype=tf.float32)
+#     print(nofHitsInOrder2)
+#     return (K.sum(y_hits_in_order2*y_pred[14,:,:,0])/nofHitsInOrder2), nofHitsInOrder2
+
+# or2, nofhitsin02 = hit_average_order2(hits_test, encoded )
+# print(or2)
+# print(nofhitsin02)
+# # %%
+# print(tf.math.count_nonzero(tf.greater(hits_test[0,:,:,2],0.), dtype=tf.float32))
+# #tf.greater(hits_test[0,:,:,2],0.5)
+# #tf.print(hits_test[0,:,:,2], summarize=-1)
+# #print(hits_test[0,:,:,2])
+# # %%
+
+# %%
