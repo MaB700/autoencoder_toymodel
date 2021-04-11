@@ -84,11 +84,12 @@ def get_custom_loss():
         return losses.mean_squared_error(y_true, y_pred[:,:,:,0])
     return custom_loss
 
-def single_event_plot(data, data0, nof_pixel_X, min_X, max_X, nof_pixel_Y, min_Y, max_Y, eventNo):
+def single_event_plot(data, data0, nof_pixel_X, min_X, max_X, nof_pixel_Y, min_Y, max_Y, eventNo, cut=0.):
     plt.figure(figsize=(20, 10))
     ax = plt.subplot(1, 2, 1)
-    plt.imshow(data[eventNo], interpolation='none', extent=[min_X,max_X,min_Y,max_Y], cmap='gray')
+    plt.imshow(tf.cast(data[eventNo] > cut, data[eventNo].dtype) * data[eventNo], interpolation='none', extent=[min_X,max_X,min_Y,max_Y], cmap='gray')
     plt.title("denoised")
+    #y = tf.maximum(data[eventNo], 0.5)
     plt.colorbar()
     #plt.gray()
     ax = plt.subplot(1, 2, 2)
