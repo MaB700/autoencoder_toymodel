@@ -81,6 +81,7 @@ def get_custom_loss():
     @tf.autograph.experimental.do_not_convert
     def custom_loss(data, y_pred):
         y_true = data[:,:,:,0]
+        #return losses.binary_crossentropy(y_true, y_pred[:,:,:,0])
         return losses.mean_squared_error(y_true, y_pred[:,:,:,0])
     return custom_loss
 

@@ -14,8 +14,9 @@ if gpus:
 
     except RuntimeError as e:
         print(e)
-from tensorflow.keras.layers import Input, Conv2D, Conv2DTranspose
+from tensorflow.keras.layers import Input, Conv2D, Conv2DTranspose, BatchNormalization
 from tensorflow.keras.models import Sequential
+
 
 # load custom functions/loss/metrics
 from autoencoder_functions import *
@@ -30,8 +31,8 @@ print("GPU is", "available" if tf.config.list_physical_devices('GPU') else "NOT 
 # load dataset
 # header gives information of parameters
 # TODO: load parameters from file header
-nofEvents_train = 10000
-nofEvents_test = 1000
+nofEvents_train = 20000
+nofEvents_test = 10000
 cut_range = 20.0
 px_x = 48
 px_y = 48
@@ -69,31 +70,37 @@ hits_noise_test = tf.math.add(hits_test, noise_test)
 hits_train = tf.concat([hits_train, noise_train, order1_train, order2_train], 3)
 hits_test = tf.concat([hits_test, noise_test, order1_test, order2_test], 3)
 
-#del noise_train, noise_test, order1_train, order2_train, order1_test, order2_test #free up momory
+del noise_train, noise_test, order1_train, order2_train, order1_test, order2_test #free up momory
 
 # %%
+hidden_activation = 'relu'
 custom_metrics = [get_hit_average(), get_noise_average(), get_background_average(),\
                     get_hit_average_order1(), get_hit_average_order2()]
 
 model = Sequential()
 model.add(Input(shape=(48, 48, 1)))
 
-model.add(Conv2D(filters=128, kernel_size=5, activation='relu', padding='same'))
-model.add(Conv2D(filters=64, kernel_size=5, activation='relu', padding='same'))
-model.add(Conv2D(filters=32, kernel_size=5, activation='relu', padding='same'))
+model.add(Conv2D(filters=32, kernel_size=5, strides=2 , activation=hidden_activation, padding='same'))
+model.add(Conv2D(filters=64, kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
+model.add(Conv2D(filters=128, kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
+#model.add(Conv2D(filters=256, kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
 
-model.add(Conv2DTranspose(filters=32 , kernel_size=5, activation='relu', padding='same'))
-model.add(Conv2DTranspose(filters=64 , kernel_size=5, activation='relu', padding='same'))
-model.add(Conv2DTranspose(filters=128 , kernel_size=5, activation='relu', padding='same'))
+#model.add(BatchNormalization())
+#model.add(Conv2DTranspose(filters=256 , kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
+model.add(Conv2DTranspose(filters=128 , kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
+model.add(Conv2DTranspose(filters=64 , kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
+model.add(Conv2DTranspose(filters=32 , kernel_size=5, strides=2 ,activation=hidden_activation, padding='same'))
+#model.add(BatchNormalization())
+
 model.add(Conv2D(1, kernel_size=5, activation='tanh', padding='same'))
 model.summary()
-#opt = tf.keras.optimizers.Adadelta(lr=0.1, rho=0.95, epsilon=1e-07 )
+#opt = tf.keras.optimizers.Adadelta(lr=10, rho=0.95, epsilon=1e-07 )
 opt = tf.keras.optimizers.Adam(learning_rate=0.001)
 model.compile(optimizer=opt, loss=get_custom_loss(), metrics=custom_metrics, experimental_steps_per_execution=10)
-es = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3)
+es = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
 model.fit(hits_noise_train, hits_train,
-                epochs=10,
-                batch_size=200,
+                epochs=100,
+                batch_size=250,
                 shuffle=True,
                 validation_data=(hits_noise_test, hits_test),
                 callbacks=[es])#,
@@ -110,7 +117,7 @@ encoded = model.predict(hits_noise_test, batch_size=200)
 interactive_plot = widgets.interact(single_event_plot, \
                     data=fixed(tf.squeeze(encoded,[3])), data0=fixed(2*hits_test[:,:,:,1]+hits_test[:,:,:,0]), \
                     nof_pixel_X=fixed(px_x), min_X=fixed(-cut_range), max_X=fixed(cut_range), \
-                    nof_pixel_Y=fixed(px_y), min_Y=fixed(-cut_range), max_Y=fixed(cut_range), eventNo=(40,60-1,1), cut=(0.,0.90,0.05))
+                    nof_pixel_Y=fixed(px_y), min_Y=fixed(-cut_range), max_Y=fixed(cut_range), eventNo=(40,80-1,1), cut=(0.,0.90,0.05))
 
 
 
