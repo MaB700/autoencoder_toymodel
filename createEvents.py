@@ -153,11 +153,13 @@ noise = pd.DataFrame((tf.reshape(noise,[nofEvents,-1])).numpy())
 
 timestr = time.strftime("%Y%m%d-%H%M%S")
 
-path = 'E:/ML_data/autoencoder_toymodel/balanced/'
-if not os.path.isdir(path):
-    os.mkdir(path)
-filename_hits = path + 'hits_'+str(nofEvents)+'_'+timestr+'.csv'
-filename_noise = path + 'noise_'+str(nofEvents)+'_'+timestr+'.csv'
+#path = 'E:/ML_data/autoencoder_toymodel/balanced/'
+#if not os.path.isdir(path):
+#    os.mkdir(path)
+#filename_hits = path + 'hits_'+str(nofEvents)+'_'+timestr+'.csv'
+#filename_noise = path + 'noise_'+str(nofEvents)+'_'+timestr+'.csv'
+filename_hits = 'hits_'+str(nofEvents)+'_'+timestr+'.csv'
+filename_noise = 'noise_'+str(nofEvents)+'_'+timestr+'.csv'
 
 header = '#create_time='+str(timestr)+', nofEvents='+str(nofEvents)+', overlapped_rings%='+str(overlapped_rings)+\
 ', nofSingleRingEventsOutOf100='+str(nofSingleRingEvents)+', nofPixelX='+str(nofPixelX)+', min_X='+str(minX)+\

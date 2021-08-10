@@ -31,16 +31,16 @@ print("GPU is", "available" if tf.config.list_physical_devices('GPU') else "NOT 
 # load dataset
 # header gives information of parameters
 # TODO: load parameters from file header
-nofEvents_train = 20000
-nofEvents_test = 10000
+nofEvents_train = 10000
+nofEvents_test = 1000
 cut_range = 20.0
 px_x = 48
 px_y = 48
 
-hits_train = pd.read_csv("E:/ML_data/autoencoder_toymodel/overlapped/hits_20000_20210408-192455.csv",header=None ,comment='#', nrows=nofEvents_train).values.astype('float32')
-hits_test = pd.read_csv("E:/ML_data/autoencoder_toymodel/overlapped/hits_10000_20210408-192127.csv",header=None ,comment='#', nrows=nofEvents_test).values.astype('float32')
-noise_train = pd.read_csv("E:/ML_data/autoencoder_toymodel/overlapped/noise_20000_20210408-192455.csv",header=None ,comment='#', nrows=nofEvents_train).values.astype('float32')
-noise_test = pd.read_csv("E:/ML_data/autoencoder_toymodel/overlapped/noise_10000_20210408-192127.csv",header=None ,comment='#', nrows=nofEvents_test).values.astype('float32')
+hits_train = pd.read_csv("./data/hits_10000_20210810-153832.csv",header=None ,comment='#', nrows=nofEvents_train).values.astype('float32')
+hits_test = pd.read_csv("./data/hits_1000_20210810-153728.csv",header=None ,comment='#', nrows=nofEvents_test).values.astype('float32')
+noise_train = pd.read_csv("./data/noise_10000_20210810-153832.csv",header=None ,comment='#', nrows=nofEvents_train).values.astype('float32')
+noise_test = pd.read_csv("./data/noise_1000_20210810-153728.csv",header=None ,comment='#', nrows=nofEvents_test).values.astype('float32')
 
 
 hits_train = tf.reshape(hits_train, [nofEvents_train, px_y, px_x])
@@ -81,14 +81,14 @@ model = Sequential()
 model.add(Input(shape=(48, 48, 1)))
 
 model.add(Conv2D(filters=32, kernel_size=5, strides=2 , activation=hidden_activation, padding='same'))
-model.add(Conv2D(filters=64, kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
-model.add(Conv2D(filters=128, kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
+#model.add(Conv2D(filters=64, kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
+#model.add(Conv2D(filters=128, kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
 #model.add(Conv2D(filters=256, kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
 
 #model.add(BatchNormalization())
 #model.add(Conv2DTranspose(filters=256 , kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
-model.add(Conv2DTranspose(filters=128 , kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
-model.add(Conv2DTranspose(filters=64 , kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
+#model.add(Conv2DTranspose(filters=128 , kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
+#model.add(Conv2DTranspose(filters=64 , kernel_size=5,strides=2 ,activation=hidden_activation, padding='same'))
 model.add(Conv2DTranspose(filters=32 , kernel_size=5, strides=2 ,activation=hidden_activation, padding='same'))
 #model.add(BatchNormalization())
 
@@ -99,8 +99,8 @@ opt = tf.keras.optimizers.Adam(learning_rate=0.001)
 model.compile(optimizer=opt, loss=get_custom_loss(), metrics=custom_metrics, experimental_steps_per_execution=10)
 es = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
 model.fit(hits_noise_train, hits_train,
-                epochs=100,
-                batch_size=250,
+                epochs=1,
+                batch_size=100,
                 shuffle=True,
                 validation_data=(hits_noise_test, hits_test),
                 callbacks=[es])#,
